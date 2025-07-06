@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>6個サイコロ ゾロ目チャレンジ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Arial", sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        header h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+
+        header p {
+            color: #666;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+
+        .dice-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 40px 0;
+            justify-items: center;
+        }
+
+        .dice {
+            width: 90px;
+            height: 90px;
+            background: #fff;
+            border: 3px solid #333;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: bold;
+            color: #333;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .dice:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .dice.rolling {
+            animation: roll 1s ease-in-out;
+        }
+
+        @keyframes roll {
+            0%, 100% {
+                transform: rotate(0deg) scale(1);
+            }
+            25% {
+                transform: rotate(90deg) scale(1.1);
+            }
+            50% {
+                transform: rotate(180deg) scale(1.2);
+            }
+            75% {
+                transform: rotate(270deg) scale(1.1);
+            }
+        }
+
+        .dice.same-number {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            color: white;
+            animation: celebrate 0.6s ease-in-out;
+        }
+
+        @keyframes celebrate {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+        }
+
+        .roll-button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.3rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            margin: 20px 0;
+        }
+
+        .roll-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .roll-button:active {
+            transform: translateY(0);
+        }
+
+        .roll-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .auto-roll-button {
+    background: linear-gradient(45deg, #ff6b6b, #feca57);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.3rem;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+    margin: 10px;
+}
+
+.auto-roll-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+}
+
+.auto-roll-button:active {
+    transform: translateY(0);
+}
+
+.auto-roll-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.auto-roll-button.active {
+    background: linear-gradient(45deg, #e74c3c, #c0392b);
+    animation: autoRollPulse 1s infinite;
+}
+
+@keyframes autoRollPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+@media (max-width: 600px) {
+    .button-container {
+        flex-direction: column;
+    }
+    
+    .roll-button, .auto-roll-button {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .dice {
+        width: 70px;
+        height: 70px;
+        font-size: 2.5rem;
+    }
+}
+
+        .message-container {
+            margin: 30px 0;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .message {
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: 15px 25px;
+            border-radius: 15px;
+            transition: all 0.5s ease;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .message.success {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            color: white;
+            animation: successPulse 2s infinite;
+        }
+
+        .message.encourage {
+            background: linear-gradient(45deg, #74b9ff, #0984e3);
+            color: white;
+        }
+
+        @keyframes successPulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            display: block;
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            display: block;
+            color: #333;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .dice-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+
+            .dice {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+
+            .stats {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .message {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎲 6個サイコロ ゾロ目チャレンジ 🎲</h1>
+            <p>6個のサイコロを振ってゾロ目を狙おう！</p>
+        </header>
+
+        <main>
+            <div class="dice-container" id="diceContainer">
+                <div class="dice" id="dice1">
+                    <div class="dice-face">1</div>
+                </div>
+                <div class="dice" id="dice2">
+                    <div class="dice-face">1</div>
+                </div>
+                <div class="dice" id="dice3">
+                    <div class="dice-face">1</div>
+                </div>
+                <div class="dice" id="dice4">
+                    <div class="dice-face">1</div>
+                </div>
+                <div class="dice" id="dice5">
+                    <div class="dice-face">1</div>
+                </div>
+                <div class="dice" id="dice6">
+                    <div class="dice-face">1</div>
+                </div>
+            </div>
+
+            <div class="button-container">
+    <button class="roll-button" id="rollButton" onclick="rollDice()">
+        🎲 サイコロを振る 🎲
+    </button>
+    <button class="auto-roll-button" id="autoRollButton" onclick="toggleAutoRoll()">
+        🔄 サイコロを自動で振る 🔄
+    </button>
+</div>
+
+            <div class="message-container" id="messageContainer">
+                <div class="message" id="message"></div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-label">挑戦回数:</span>
+                    <span class="stat-value" id="totalRolls">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">ゾロ目成功:</span>
+                    <span class="stat-value" id="successCount">0</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let totalRolls = 0;
+        let successCount = 0;
+        let isRolling = false;
+        let isAutoRolling = false;
+        let autoRollInterval = null;
+
+        // お祝いメッセージ
+        const successMessages = [
+            "🎉 おめでとうございます！ゾロ目達成！🎉",
+            "✨ 素晴らしい！完璧なゾロ目です！✨",
+            "🌟 奇跡的！全部同じ数字が出ました！🌟",
+            "🎊 すごい！ゾロ目の神様が微笑みました！🎊",
+            "💫 信じられない！パーフェクトです！💫",
+            "🏆 チャンピオン級の運の持ち主ですね！🏆"
+        ];
+
+        // 励ましメッセージ
+        const encourageMessages = [
+            "💪 惜しい！次こそゾロ目を狙いましょう！",
+            "🌈 大丈夫！きっと次は成功します！",
+            "⭐ あと少し！諦めずに挑戦しましょう！",
+            "🎯 運は必ず回ってきます！頑張って！",
+            "🍀 次回に期待！幸運を祈っています！",
+            "🎲 練習あるのみ！もう一度チャレンジ！",
+            "✊ 負けないで！ゾロ目は必ず出ます！",
+            "🌸 運命の瞬間はもうすぐです！"
+        ];
+
+        function toggleAutoRoll() {
+    const autoRollButton = document.getElementById('autoRollButton');
+    const rollButton = document.getElementById('rollButton');
+    
+    if (isAutoRolling) {
+        // 自動振りを停止
+        isAutoRolling = false;
+        if (autoRollInterval) {
+            clearTimeout(autoRollInterval);
+            autoRollInterval = null;
+        }
+        autoRollButton.textContent = '🔄 サイコロを自動で振る 🔄';
+        autoRollButton.classList.remove('active');
+        rollButton.disabled = false;
+    } else {
+        // 自動振りを開始
+        isAutoRolling = true;
+        autoRollButton.textContent = '⏹️ 自動振りを停止 ⏹️';
+        autoRollButton.classList.add('active');
+        rollButton.disabled = true;
+        
+        // 最初のサイコロを振る
+        autoRollDice();
+    }
+}
+
+function autoRollDice() {
+    if (!isAutoRolling) return;
+    
+    // 通常のサイコロ振り処理を実行
+    rollDiceInternal(() => {
+        // サイコロの結果が出てから1秒後に次のサイコロを振る
+        if (isAutoRolling) {
+            autoRollInterval = setTimeout(() => {
+                autoRollDice();
+            }, 1000);
+        }
+    });
+}
+
+function rollDiceInternal(callback) {
+    if (isRolling) return;
+
+    isRolling = true;
+    const rollButton = document.getElementById('rollButton');
+    const messageElement = document.getElementById('message');
+
+    // ボタンを無効化（手動の場合のみ）
+    if (!isAutoRolling) {
+        rollButton.disabled = true;
+        rollButton.textContent = '🎲 振っています... 🎲';
+    }
+
+    // メッセージをクリア
+    messageElement.classList.remove('show', 'success', 'encourage');
+
+    // 全てのサイコロにローリングアニメーションを追加
+    const diceElements = document.querySelectorAll('.dice');
+    diceElements.forEach(dice => {
+        dice.classList.add('rolling');
+        dice.classList.remove('same-number');
+    });
+
+    // ランダムな値を生成
+    const diceValues = [];
+    for (let i = 0; i < 6; i++) {
+        diceValues.push(Math.floor(Math.random() * 6) + 1);
+    }
+
+    // 1秒後にアニメーションを停止し、結果を表示
+    setTimeout(() => {
+        // サイコロの値を更新
+        diceElements.forEach((dice, index) => {
+            dice.classList.remove('rolling');
+            const faceElement = dice.querySelector('.dice-face');
+            faceElement.textContent = diceValues[index];
+
+            // サイコロの目を点で表示する関数
+            updateDiceFace(faceElement, diceValues[index]);
+        });
+
+        // ゾロ目判定
+        const isAllSame = diceValues.every(value => value === diceValues[0]);
+
+        // 統計を更新
+        totalRolls++;
+        document.getElementById('totalRolls').textContent = totalRolls;
+
+        if (isAllSame) {
+            successCount++;
+            document.getElementById('successCount').textContent = successCount;
+
+            // ゾロ目の場合の処理
+            diceElements.forEach(dice => {
+                dice.classList.add('same-number');
+            });
+
+            const randomSuccessMessage = successMessages[Math.floor(Math.random() * successMessages.length)];
+            showMessage(randomSuccessMessage, 'success');
+
+            // 紙吹雪エフェクト（簡易版）
+            createConfetti();
+        } else {
+            // ゾロ目でない場合の処理
+            const randomEncourageMessage = encourageMessages[Math.floor(Math.random() * encourageMessages.length)];
+            showMessage(randomEncourageMessage, 'encourage');
+        }
+
+        // ボタンを再有効化（手動の場合のみ）
+        if (!isAutoRolling) {
+            rollButton.disabled = false;
+            rollButton.textContent = '🎲 サイコロを振る 🎲';
+        }
+        
+        isRolling = false;
+        
+        // コールバック関数を実行
+        if (callback) {
+            callback();
+        }
+    }, 1000);
+}
+
+// 既存のrollDice関数を更新
+function rollDice() {
+    rollDiceInternal();
+}
+
+        function updateDiceFace(element, value) {
+            // サイコロの目を点で表現
+            const dotPatterns = {
+                1: '⚀',
+                2: '⚁',
+                3: '⚂',
+                4: '⚃',
+                5: '⚄',
+                6: '⚅'
+            };
+
+            element.textContent = dotPatterns[value] || value;
+        }
+
+        function showMessage(text, type) {
+            const messageElement = document.getElementById('message');
+            messageElement.textContent = text;
+            messageElement.classList.add('show', type);
+        }
+
+        function createConfetti() {
+            // 簡易的な紙吹雪エフェクト
+            const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff'];
+
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.style.position = 'fixed';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.top = '-10px';
+                    confetti.style.width = '10px';
+                    confetti.style.height = '10px';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.pointerEvents = 'none';
+                    confetti.style.zIndex = '1000';
+                    confetti.style.borderRadius = '50%';
+
+                    document.body.appendChild(confetti);
+
+                    // アニメーション
+                    let pos = -10;
+                    let opacity = 1;
+                    const fall = setInterval(() => {
+                        pos += 5;
+                        opacity -= 0.02;
+                        confetti.style.top = pos + 'px';
+                        confetti.style.opacity = opacity;
+
+                        if (pos > window.innerHeight || opacity <= 0) {
+                            clearInterval(fall);
+                            document.body.removeChild(confetti);
+                        }
+                    }, 20);
+                }, i * 20);
+            }
+        }
+
+        // 初期化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 初期状態でサイコロの目を設定
+            const diceElements = document.querySelectorAll('.dice .dice-face');
+            diceElements.forEach((face, index) => {
+                updateDiceFace(face, 1);
+            });
+        });
+    </script>
+</body>
+</html>
